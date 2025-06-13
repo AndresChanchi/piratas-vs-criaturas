@@ -1,2 +1,24 @@
+# Los que me viene por defecto :/
 .idea/
 .venv/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos virtuales
+venv/
+.env/
+
+# Archivos de log o debug
+*.log
+
+# Pruebas (no creo que me alcance el tiempo) hubiera hecho tdd :,v
+*.bak
+*.tmp
