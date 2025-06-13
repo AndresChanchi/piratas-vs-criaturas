@@ -5,7 +5,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
 # Colors (RGB)
-BACKGROUND_COLOR = (20, 20, 40)  # Azul oscuro marino
+BACKGROUND_COLOR = (28,133,217,255)# Azul marino o soy daltonico
 
 # Game settings
 FPS = 60
