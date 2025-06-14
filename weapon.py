@@ -1,6 +1,3 @@
-# weapon.py
-# Define weapons (cannons and future mortar) attached to the player ship.
-
 import pygame
 import os
 
