@@ -15,6 +15,13 @@ class Player(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
 
         self.speed = 5
+        #Gatos, cats montado
+        self.cat_frames = [
+            pygame.image.load(f"assets/images/characters/cats/PirateCat ({i}).png").convert_alpha()
+            for i in range(1, 4)
+        ]
+        self.cat_index = 0
+        self.cat_image = self.cat_frames[self.cat_index]
 
     def load_images(self, scale):
         image_folder = "assets/images/characters/player"
@@ -47,3 +54,15 @@ class Player(pygame.sprite.Sprite):
             self.current_frame = 0
 
         self.image = self.animation_frames[int(self.current_frame)]
+
+        #Animación gato
+        self.cat_index = (self.cat_index + 0.1) % len(self.cat_frames)
+        self.cat_image = self.cat_frames[int(self.cat_index)]
+
+        # Dibujar
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+        # Dibujar gato con offset (5 px a la izquierda, centrado en Y respecto al barco)
+        cat_x = self.rect.x + 5
+        cat_y = self.rect.y + (self.rect.height // 2 - self.cat_image.get_height() // 2)
+        surface.blit(self.cat_image, (cat_x, cat_y))
