@@ -1,18 +1,19 @@
-# main.py
-
-import pygame
-import sys
-
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BACKGROUND_COLOR, FPS, WINDOW_TITLE
+import pygame, sys
+from constants import *
 from player import Player
 from weapon import Cannon
+from menu import menu_loop, pause_menu
 
 def main():
-    pygame.init()
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption(WINDOW_TITLE)
     clock = pygame.time.Clock()
+
+    # --- Botón de pausa ---
+    pause_img = pygame.image.load("assets/images/ui/pause_button.png").convert_alpha()
+    pause_img = pygame.transform.scale(pause_img, (48, 48))
+    pause_rect = pause_img.get_rect(topright=(SCREEN_WIDTH - 10, 10))
 
     # --- Sprites y grupos ---
     player = Player(x=100, y=SCREEN_HEIGHT//2 - 64, scale=1.5)
@@ -22,7 +23,7 @@ def main():
     all_cannons = pygame.sprite.Group()
 
     # --- Instanciación de cañones ---
-    # Cañones laterales arriba
+    # Cañones laterales arriba, logica de weapon, al carajo la modularización
     cannon_up_left = Cannon(
         parent=player,
         direction='up',
@@ -76,6 +77,15 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                res = pause_menu()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if pause_rect.collidepoint(event.pos):
+                    res = pause_menu()
+                    if res == "restart":
+                        return main()
+                    elif res == "home":
+                        return menu_loop(main)
 
         # --- Lógica de juego ---
         keys = pygame.key.get_pressed()
@@ -94,15 +104,16 @@ def main():
 
         # --- Dibujado ---
         screen.fill(BACKGROUND_COLOR)
-        all_sprites.draw(screen)
+        player.draw(screen)
         all_cannons.draw(screen)
         projectiles.draw(screen)
+        screen.blit(pause_img, pause_rect)
         pygame.display.flip()
-
         clock.tick(FPS)
 
     pygame.quit()
     sys.exit()
 
 if __name__ == "__main__":
-    main()
+    pygame.init()
+    menu_loop(main)
