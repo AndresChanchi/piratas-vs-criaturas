@@ -5,17 +5,23 @@ from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 class Player(pygame.sprite.Sprite):
     def __init__(self, x=100, y=100, scale=1.0):
         super().__init__()
+        # Salud del jugador
+        self.max_health = 10
+        self.health = self.max_health
+
+        # Animaciones del personaje
         self.animation_frames = []
         self.current_frame = 0
         self.animation_speed = 0.15  # entre menor, más rápido
-
         self.load_images(scale)
         self.image = self.animation_frames[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
 
+        # Velocidad de movimiento
         self.speed = 5
-        #Gatos, cats montado
+
+        # Animación de gato en el barco
         self.cat_frames = [
             pygame.image.load(f"assets/images/characters/cats/PirateCat ({i}).png").convert_alpha()
             for i in range(1, 4)
@@ -35,6 +41,11 @@ class Player(pygame.sprite.Sprite):
 
             self.animation_frames.append(img)
 
+    def take_damage(self, amount):
+        """Reduce la salud sin bajar de cero."""
+        self.health = max(0, self.health - amount)
+        # Aquí podrías agregar lógica de estado 'hurt' o muerte cuando health == 0
+
     def update(self, keys):
         # Movimiento
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
@@ -48,21 +59,19 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.clamp_ip(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
 
-        # Animación
+        # Animación del barco
         self.current_frame += self.animation_speed
         if self.current_frame >= len(self.animation_frames):
             self.current_frame = 0
-
         self.image = self.animation_frames[int(self.current_frame)]
 
-        #Animación gato
+        # Animación del gato
         self.cat_index = (self.cat_index + 0.1) % len(self.cat_frames)
         self.cat_image = self.cat_frames[int(self.cat_index)]
 
-        # Dibujar
     def draw(self, surface):
+        # Dibuja barco y gato
         surface.blit(self.image, self.rect)
-        # Dibujar gato con offset (5 px a la izquierda, centrado en Y respecto al barco)
         cat_x = self.rect.x + 5
         cat_y = self.rect.y + (self.rect.height // 2 - self.cat_image.get_height() // 2)
         surface.blit(self.cat_image, (cat_x, cat_y))
