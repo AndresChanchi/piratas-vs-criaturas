@@ -3,6 +3,10 @@ from constants import *
 from player import Player
 from weapon import Cannon
 from menu import menu_loop, pause_menu
+from collisions import (
+    handle_projectile_enemy_collisions,
+    handle_player_enemy_collisions
+)
 
 def main():
 
@@ -19,11 +23,17 @@ def main():
     player = Player(x=100, y=SCREEN_HEIGHT//2 - 64, scale=1.5)
     all_sprites = pygame.sprite.Group(player)
 
+    # --- Grupos de enemigos ---
+    from enemy import EnemyManager, Anguila, Tiburon, Medusa, BossFish
+
+    enemies = pygame.sprite.Group()
+    enemy_manager = EnemyManager(enemies, player)
+
     projectiles = pygame.sprite.Group()
     all_cannons = pygame.sprite.Group()
 
     # --- Instanciación de cañones ---
-    # Cañones laterales arriba, logica de weapon, al carajo la modularización
+    # Cañones laterales arriba, logica de weapon, al carajo la modularización y signle of truth
     cannon_up_left = Cannon(
         parent=player,
         direction='up',
@@ -73,6 +83,7 @@ def main():
 
     running = True
     while running:
+        dt = clock.tick(FPS)
         # --- Eventos ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -90,6 +101,7 @@ def main():
         # --- Lógica de juego ---
         keys = pygame.key.get_pressed()
         player.update(keys)
+        enemies.update(player)
 
         current_time = pygame.time.get_ticks()
         key_state = pygame.key.get_pressed()
@@ -102,14 +114,50 @@ def main():
 
         projectiles.update()
 
+        # --- Lógica de enemigos ---
+        enemy_manager.update(dt)      # crea nuevos enemigos cuando toca
+        enemies.update(player)        # mueve y anima a cada enemigo
+
+        #colisiones
+        handle_projectile_enemy_collisions(projectiles, enemies)
+        handle_player_enemy_collisions(player, enemies)
+
         # --- Dibujado ---
         screen.fill(BACKGROUND_COLOR)
         player.draw(screen)
         all_cannons.draw(screen)
         projectiles.draw(screen)
+
+        # ② Barra de salud
+        BAR_WIDTH = 100
+        BAR_HEIGHT = 10
+        bar_x = player.rect.centerx - BAR_WIDTH // 2
+        bar_y = player.rect.top - BAR_HEIGHT - 5
+        health_ratio = player.health / player.max_health
+        # fondo gris
+        pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, BAR_WIDTH, BAR_HEIGHT))
+        # salud verde
+        pygame.draw.rect(screen, (0, 200, 0), (bar_x, bar_y, int(BAR_WIDTH * health_ratio), BAR_HEIGHT))
+
+        # ③ Botón de pausa y flip
         screen.blit(pause_img, pause_rect)
         pygame.display.flip()
-        clock.tick(FPS)
+
+        # --- Dibujar enemigos ---
+        enemies.draw(screen)
+
+        screen.blit(pause_img, pause_rect)
+        pygame.display.flip()
+
+        # --- GAME OVER ---
+        if player.health <= 0:
+            font = pygame.font.SysFont(None, 72)
+            text = font.render("GAME OVER", True, (255, 0, 0))
+            text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            screen.blit(text, text_rect)
+            pygame.display.flip()
+            pygame.time.wait(3000)  # Espera 3 segundos
+            return menu_loop(main)  # Regresa al menú principal
 
     pygame.quit()
     sys.exit()
