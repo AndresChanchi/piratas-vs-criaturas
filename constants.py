@@ -12,3 +12,5 @@ FPS = 60
 
 # Window title
 WINDOW_TITLE = "Pirates vs Sea Creatures"
+
+#La fuente de la verdad(single of truth), pero que lo iba a ser más tarde :,v, no alcanzoo aaa
